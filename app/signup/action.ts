@@ -23,5 +23,9 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/login')
+
+  alert("An email is sent for verification please click to verify then login ")
+  redirect("/login")
+  
+  
 }
