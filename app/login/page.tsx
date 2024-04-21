@@ -57,16 +57,16 @@ const handleSignInWithGoogle = async (response: any) => {
 };
 
 const Login = () => {
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    document.body.appendChild(script);
+  // useEffect(() => {
+  //   const script = document.createElement("script");
+  //   script.src = "https://accounts.google.com/gsi/client";
+  //   script.async = true;
+  //   document.body.appendChild(script);
 
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+  //   return () => {
+  //     document.body.removeChild(script);
+  //   };
+  // }, []);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -150,7 +150,7 @@ const Login = () => {
         </Link>
       </div>
 
-      <div>
+      {/* <div>
         <div
           id="g_id_onload"
           data-client_id="114615926093-m87h2n42a55jo5lgfbit90qqm45h9843.apps.googleusercontent.com"
@@ -169,7 +169,7 @@ const Login = () => {
           data-size="large"
           data-logo_alignment="left"
         ></div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -217,10 +217,10 @@ export default function Home() {
 
     fetchData();
   }, []);
-  // Include user in dependency array to re-run effect when user changes
+
 
   useEffect(() => {
-    // Scroll to the bottom when messages change
+    
     const scrollToBottom = () => {
       if (scrollAreaRef.current) {
         scrollAreaRef.current.scroll({
@@ -232,14 +232,14 @@ export default function Home() {
     scrollToBottom();
   }, [messages]);
 
-  async function handleSignInWithGoogle(response: any) {
-    const { data, error } = await supabase.auth.signInWithIdToken({
-      provider: "google",
-      token: response.credential,
-      nonce: "NONCE", // must be the same one as provided in data-nonce (if any)
-    });
-    console.log(data);
-  }
+  // async function handleSignInWithGoogle(response: any) {
+  //   const { data, error } = await supabase.auth.signInWithIdToken({
+  //     provider: "google",
+  //     token: response.credential,
+  //     nonce: "NONCE", // must be the same one as provided in data-nonce (if any)
+  //   });
+  //   console.log(data);
+  // }
 
   return (
     <>
@@ -283,7 +283,7 @@ export default function Home() {
                 <HistoryCard
                   name={data.name}
                   className={`cursor-pointer ${
-                    clickedCard === index ? "bg-gray-200" : "" // Change background color if clicked
+                    clickedCard === index ? "bg-gray-200" : "" 
                   }`}
                 />
               </div>
