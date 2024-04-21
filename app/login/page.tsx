@@ -15,7 +15,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
-
 import { z } from "zod";
 import { login } from "./action";
 import { createClient } from "@/utils/supabase/client";
@@ -144,7 +143,7 @@ const Login = () => {
         </form>
       </Form>
       <div className="text-sm pt-1">
-        <span>Don't have an account?</span>{" "}
+        <span>Don&apos;t have an account?</span>{" "}
         <Link className="text-[#10a37f]" href={"/signup"}>
           Signup
         </Link>

@@ -191,7 +191,6 @@ export default function Home() {
 
         const userId = userData.user.id;
 
-        // Fetch user's profile from profiles table using user's ID
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("username")
@@ -218,9 +217,7 @@ export default function Home() {
     fetchData();
   }, []);
 
-
   useEffect(() => {
-    
     const scrollToBottom = () => {
       if (scrollAreaRef.current) {
         scrollAreaRef.current.scroll({
@@ -283,7 +280,7 @@ export default function Home() {
                 <HistoryCard
                   name={data.name}
                   className={`cursor-pointer ${
-                    clickedCard === index ? "bg-gray-200" : "" 
+                    clickedCard === index ? "bg-gray-200" : ""
                   }`}
                 />
               </div>
@@ -300,7 +297,9 @@ export default function Home() {
                   height={38}
                   className="flex-none"
                 />
-                <div className="grow text-lg tracking-wide font-[400]">{user.username}</div>
+                <div className="grow text-lg tracking-wide font-[400]">
+                  {user.username}
+                </div>
               </div>
             </>
           ) : (
@@ -383,7 +382,9 @@ export default function Home() {
                         height={40}
                       />
                     </div>
-                    <div className="font-bold text-3xl">How can I help you today?</div>
+                    <div className="font-bold text-3xl">
+                      How can I help you today?
+                    </div>
                   </div>
                 </>
               )}
