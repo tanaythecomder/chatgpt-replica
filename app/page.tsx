@@ -5,45 +5,149 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { createClient } from "@/utils/supabase/client";
 import { FiEdit } from "react-icons/fi";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AiOutlineLogout } from "react-icons/ai";
+import { HiUpload } from "react-icons/hi";
+import { error } from "console";
+import { on } from "stream";
+import ChatResponse from "@/components/pageresponse/chatResponse";
+
+interface MessageResponse {
+  message_id: any;
+  chat_id?: any;
+  sender: any;
+  content: any;
+}
 
 export default function Home() {
   const supabase = createClient();
-  const [user, setUser] = useState<null | {}>(null);
+  const [user, setUser] = useState<null | string>(null);
+  const [ongoingPromt, setOngoingPromt] = useState<string>("");
+  const [chatId, setChatId] = useState<string | null>();
+  const [messages, setMessages] = useState<
+    MessageResponse[] | undefined | null
+  >(undefined);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  async function checkUser() {
-    const { data, error } = await supabase.auth.getUser();
-    console.log(data);
-    if (error || !data.user) throw error;
-    return data;
-  }
   async function signOut() {
     console.log("logged out", user);
     const { error } = await supabase.auth.signOut();
     setUser(null);
+    setChatId(null);
+    setMessages(null);
+    sessionStorage.removeItem("chat_id");
     if (error) throw error;
   }
 
+  // console.log(chatId);
+
+  async function handleSubmit() {
+    try {
+      if (ongoingPromt.trim() !== "") {
+        const { data, error } = await supabase
+          .from("messages")
+          .insert([
+            {
+              chat_id: chatId,
+              sender: "user",
+              timestamp: new Date(),
+              content: ongoingPromt,
+            },
+          ])
+          .select();
+        if (error) throw error;
+        console.log(data);
+      } else return;
+      setOngoingPromt("");
+    } catch (error) {
+      console.log("error in sending messages");
+    }
+  }
+
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    document.body.appendChild(script);
+    async function fetchMessages() {
+      try {
+        const { data, error } = await supabase
+          .from("messages")
+          .select("message_id,sender,content")
+          .eq("chat_id", chatId)
+          .order("timestamp", { ascending: true });
 
-    checkUser()
-      .then((res) => {
-        console.log(res.user);
-        setUser(res.user);
-      })
-      .catch(() => setUser(null));
+        if (error) throw error;
+        console.log(data);
+        setMessages(data);
+      } catch (error) {
+        console.log("Messages retrieval failed");
+      }
+    }
+    if (chatId && user) {
+      fetchMessages();
+    }
+  }, [chatId, ongoingPromt]);
 
-    return () => {
-      document.body.removeChild(script);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+
+        if (error || !data.user) {
+          setUser(null);
+          return;
+        }
+        console.log();
+        setUser(data.user.id);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+
+      const chat_id = sessionStorage.getItem("chat_id");
+      console.log(chat_id);
+
+      if (!chat_id && user) {
+        try {
+          const { data, error } = await supabase
+            .from("chats")
+            .insert([
+              {
+                user_id: user,
+                start_time: new Date(), // Current timestamp
+              },
+            ])
+            .select();
+
+          if (error) {
+            throw error;
+          }
+          console.log(data);
+          const insertedChatId = data[0].chat_id;
+          console.log(insertedChatId);
+          setChatId(insertedChatId);
+          sessionStorage.setItem("chat_id", insertedChatId.toString());
+        } catch (error) {
+          console.error("Error inserting chat:", error);
+        }
+      } else {
+        setChatId(chat_id);
+      }
+    }
+
+    fetchData();
+  }, [user]); // Include user in dependency array to re-run effect when user changes
+
+  useEffect(() => {
+    // Scroll to the bottom when messages change
+    const scrollToBottom = () => {
+      if (scrollAreaRef.current) {
+        scrollAreaRef.current.scroll({
+          top: scrollAreaRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }
     };
-  }, []);
+    scrollToBottom()
+  }, [messages]);
 
   async function handleSignInWithGoogle(response: any) {
     const { data, error } = await supabase.auth.signInWithIdToken({
@@ -181,100 +285,41 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="h-full flex flex-col justify-center items-center overflow-y-auto">
-            <ScrollArea className="grow w-full  ">
+          <div className="w-full h-full flex flex-col justify-center items-center overflow-y-auto">
+            <ScrollArea className="grow  w-full pb-4 ">
               <div className="flex justify-center">
-                <div className="w-[68%]  ">
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
-                  fkanfkankjankanfafnksanfksnkfnkjnnfanmn
+                <div className="min-w-[60%]">
+                  {messages?.map((message, key) => (
+                    <ChatResponse
+                      key={key}
+                      sender={message.sender}
+                      text={message.content}
+                      userImage={"/user.png"}
+                    />
+                  ))}
                 </div>
               </div>
-            </ScrollArea>
 
-            <Input
-              className="w-[68%] flex mb-10 py-8 rounded-2xl text-lg pl-8 outline-none ring-0 shadow-md"
-              type="email"
-              placeholder="Message ChatGPT.."
-            />
+            </ScrollArea>
+            <div className="w-[60%] flex relative">
+              <Input
+                className="  flex mb-10 py-8 rounded-2xl text-lg pl-8 outline-none ring-0 shadow-md"
+                type="email"
+                placeholder="Message ChatGPT.."
+                onChange={(e) => setOngoingPromt(e.target.value)}
+                value={ongoingPromt}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSubmit();
+                  }
+                }}
+              />
+
+              <HiUpload
+                onClick={handleSubmit}
+                className=" hover:text-white hover:bg-black text-[40px] m-3 bg-gray-100 rounded-xl p-2 absolute right-1"
+              />
+            </div>
           </div>
         </main>
       </div>

@@ -26,6 +26,9 @@ const formSchema = z.object({
   password: z.string().min(8, {
     message: "Password must be at least 2 characters.",
   }),
+  username: z.string().min(5, {
+    message: "Provide valid username",
+  }),
 });
 
 const Signup = () => {
@@ -34,6 +37,7 @@ const Signup = () => {
     defaultValues: {
       email: "",
       password: "",
+      username: "",
     },
   });
 
@@ -42,6 +46,7 @@ const Signup = () => {
     const formData = new FormData();
     formData.append("email", values.email);
     formData.append("password", values.password);
+    formData.append("username", values.username);
 
     signup(formData); // Call the signup function with the form data
   }
@@ -60,6 +65,26 @@ const Signup = () => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 w-[340px] pt-10"
         >
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                {/* <FormLabel>email</FormLabel> */}
+                <FormControl>
+                  <Input
+                    className="py-6 border-2"
+                    placeholder="username"
+                    {...field}
+                  />
+                </FormControl>
+                {/* <FormDescription>
+              This is your public display name.
+            </FormDescription> */}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="email"
