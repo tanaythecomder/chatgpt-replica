@@ -10,9 +10,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { AiOutlineLogout } from "react-icons/ai";
 import { HiUpload } from "react-icons/hi";
-import { error } from "console";
-import { on } from "stream";
 import ChatResponse from "@/components/pageresponse/chatResponse";
+import HistoryCard from "@/components/pageresponse/history";
 
 interface MessageResponse {
   message_id: any;
@@ -20,37 +19,114 @@ interface MessageResponse {
   sender: any;
   content: any;
 }
+interface HistoryResponse {
+  chat_id: any;
+  name: any;
+}
 
 export default function Home() {
   const supabase = createClient();
-  const [user, setUser] = useState<null | string>(null);
+  const [user, setUser] = useState<null | { id: string; username: string }>(
+    null
+  );
   const [ongoingPromt, setOngoingPromt] = useState<string>("");
   const [chatId, setChatId] = useState<string | null>();
   const [messages, setMessages] = useState<
     MessageResponse[] | undefined | null
   >(undefined);
+  const [clickedCard, setClickedCard] = useState<number | null>(null);
+
+  const [history, setHistory] = useState<
+    HistoryResponse[] | undefined | null
+  >();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  const handleToggle = (index: number) => {
+    if (clickedCard === index) {
+      setClickedCard(null); // If already clicked, reset the state
+    } else {
+      setClickedCard(index); // Set the clicked card ID
+    }
+  };
   async function signOut() {
     console.log("logged out", user);
     const { error } = await supabase.auth.signOut();
     setUser(null);
     setChatId(null);
     setMessages(null);
+    setHistory(null);
     sessionStorage.removeItem("chat_id");
     if (error) throw error;
   }
+  async function handleChatId(id?: string) {
+    console.log("yes ");
+    if (id) {
+      sessionStorage.setItem("chat_id", id);
+      setChatId(id);
+    } else {
+      setClickedCard(null);
+      console.log("removing chatid");
+      sessionStorage.removeItem("chat_id");
+      setChatId(null);
+    }
+  }
 
   // console.log(chatId);
-
-  async function handleSubmit() {
+  async function fetchMessages() {
     try {
-      if (ongoingPromt.trim() !== "") {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("message_id,sender,content")
+        .eq("chat_id", chatId)
+        .order("timestamp", { ascending: true });
+
+      if (error) throw error;
+      // console.log(data);
+      setMessages(data);
+    } catch (error) {
+      console.log("Messages retrieval failed", error);
+    }
+  }
+
+  // function to handle prompt submit button
+  async function handleSubmit() {
+    if (!chatId && user && ongoingPromt.trim() !== "") {
+      try {
+        const { data, error } = await supabase
+          .from("chats")
+          .insert([
+            {
+              user_id: user.id,
+              start_time: new Date(),
+              name: ongoingPromt, // Current timestamp
+            },
+          ])
+          .select();
+
+        if (error) {
+          throw error;
+        }
+        console.log(data);
+        const insertedChatId = data[0].chat_id;
+        console.log(insertedChatId);
+        setChatId(insertedChatId);
+        setClickedCard(0);
+        sessionStorage.setItem("chat_id", insertedChatId.toString());
+      } catch (error) {
+        console.error("Error inserting chat:", error);
+      }
+    }
+
+    try {
+      if (!user) {
+        alert("login first");
+      } else if (ongoingPromt.trim() !== "") {
+        const chat_id = sessionStorage.getItem("chat_id");
         const { data, error } = await supabase
           .from("messages")
           .insert([
             {
-              chat_id: chatId,
+              chat_id: chat_id,
               sender: "user",
               timestamp: new Date(),
               content: ongoingPromt,
@@ -62,79 +138,86 @@ export default function Home() {
       } else return;
       setOngoingPromt("");
     } catch (error) {
-      console.log("error in sending messages");
+      console.log(error);
     }
+
+    if (chatId) fetchMessages();
   }
 
+  // fetching the messages from the database
   useEffect(() => {
-    async function fetchMessages() {
+    console.log("........in fetchmessage......");
+    if (chatId && user) {
+      console.log("....fetching message......");
+      fetchMessages();
+    } else {
+      console.log(".....if chatid is null");
+      setMessages(null);
+    }
+  }, [chatId]);
+
+  // used to fetch side bar history
+  useEffect(() => {
+    async function fetchHistory() {
       try {
         const { data, error } = await supabase
-          .from("messages")
-          .select("message_id,sender,content")
-          .eq("chat_id", chatId)
-          .order("timestamp", { ascending: true });
-
-        if (error) throw error;
+          .from("chats")
+          .select("chat_id, name,start_time")
+          .eq("user_id", user?.id)
+          .order("start_time", { ascending: false });
         console.log(data);
-        setMessages(data);
+        setHistory(data);
+
+        if (error) console.log(error);
       } catch (error) {
-        console.log("Messages retrieval failed");
+        console.log(error);
       }
     }
-    if (chatId && user) {
-      fetchMessages();
-    }
-  }, [chatId, ongoingPromt]);
+    if (user) fetchHistory();
+  }, [user, chatId]);
+
+  // Import your supabase client
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data, error } = await supabase.auth.getUser();
+        const { data: userData, error: userError } =
+          await supabase.auth.getUser();
 
-        if (error || !data.user) {
+        if (userError || !userData) {
           setUser(null);
           return;
         }
-        console.log();
-        setUser(data.user.id);
+
+        const userId = userData.user.id;
+
+        // Fetch user's profile from profiles table using user's ID
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", userId)
+          .single();
+
+        if (profileError || !profileData) {
+          setUser(null); // Handle error or if profile not found
+          return;
+        }
+
+        // Set username in state
+        setUser({ id: userId, username: profileData.username });
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
 
       const chat_id = sessionStorage.getItem("chat_id");
-      console.log(chat_id);
-
-      if (!chat_id && user) {
-        try {
-          const { data, error } = await supabase
-            .from("chats")
-            .insert([
-              {
-                user_id: user,
-                start_time: new Date(), // Current timestamp
-              },
-            ])
-            .select();
-
-          if (error) {
-            throw error;
-          }
-          console.log(data);
-          const insertedChatId = data[0].chat_id;
-          console.log(insertedChatId);
-          setChatId(insertedChatId);
-          sessionStorage.setItem("chat_id", insertedChatId.toString());
-        } catch (error) {
-          console.error("Error inserting chat:", error);
-        }
-      } else {
+      if (chat_id) {
         setChatId(chat_id);
       }
     }
 
     fetchData();
-  }, [user]); // Include user in dependency array to re-run effect when user changes
+  }, []);
+  // Include user in dependency array to re-run effect when user changes
 
   useEffect(() => {
     // Scroll to the bottom when messages change
@@ -146,7 +229,7 @@ export default function Home() {
         });
       }
     };
-    scrollToBottom()
+    scrollToBottom();
   }, [messages]);
 
   async function handleSignInWithGoogle(response: any) {
@@ -162,77 +245,62 @@ export default function Home() {
     <>
       <div className=" flex h-screen">
         <ScrollArea
-          className="min-w-[22rem] max-w-[22rem]  rounded-md border p-4 bg-[#F9F9F9] 
+          className="min-w-[21rem] max-w-[21rem]  rounded-md border p-4 bg-[#F9F9F9] 
         "
         >
           {/* sidebar nav bar */}
-          <div className="bg-[#F9F9F9] py-3 px-4 flex justify-between items-center sticky top-0 ">
-            <div className="flex items-center gap-2">
-              <Image
-                className="rounded-full border-1 text-black"
-                src={"/logo.svg"}
-                alt="Logo"
-                width={30}
-                height={30}
-              />
+          <div
+            onClick={() => handleChatId()}
+            className="bg-[#F9F9F9] hover:bg-gray-200 hover:rounded-xl py-2 px-2 flex justify-between items-center sticky top-0 "
+          >
+            <div className="flex items-center gap-2 ">
+              <div className="bg-white p-[5px] border-2 rounded-full">
+                <Image
+                  className="rounded-full border-1 text-black"
+                  src={"/logo.svg"}
+                  alt="Logo"
+                  width={23}
+                  height={23}
+                />
+              </div>
               <div className="text-black font-semibold">New Chat</div>
             </div>
-            <div>
-              <FiEdit className="text-xl" />
+            <div className="pr-5">
+              <FiEdit className="text-xl " />
             </div>
           </div>
 
           {/* History */}
-          <div className="pt-10">
-            <div>
-              Jokester began sneaking into the castle in the middle of the night
-              and leaving jokes all over the place: under the king's pillow, in
-              his soup, even in the royal toilet. The king was furious, but he
-              couldn't seem to stop Jokester. And then, one day, the people of
-              the kingdom discovered that the jokes left by J okester were so
-              funny that they couldn't help but laugh. And once they started
-              laughing, they couldn't stop.
-            </div>
-            <div>
-              Jokester began sneaking into the castle in the middle of the night
-              and leaving jokes all over the place: under the king's pillow, in
-              his soup, even in the royal toilet. The king was furious, but he
-              couldn't seem to stop Jokester. And then, one day, the people of
-              the kingdom discovered that the jokes left by Jokester were so
-              funny that they couldn't help but laugh. And once they started
-              laughing, they couldn't stop.
-            </div>
-            <div>
-              Jokester began sneaking into the castle in the middle of the night
-              and leaving jokes all over the place: under the king's pillow, in
-              his soup, even in the royal toilet. The king was furious, but he
-              couldn't seem to stop Jokester. And then, one day, the people of
-              the kingdom discovered that the jokes left by Jokester were so
-              funny that they couldn't help but laugh. And once they started
-              laughing, they couldn't stop.
-            </div>
-            <div>
-              Jokester began sneaking into the castle in the middle of the night
-              and leaving jokes all over the place: under the king's pillow, in
-              his soup, even in the royal toilet. The king was furious, but he
-              couldn't seem to stop Jokester. And then, one day, the people of
-              the kingdom discovered that the jokes left by Jokester were so
-              funny that they couldn't help but laugh. And once they started
-              laughing, they couldn't stop.
-            </div>
+          <div className="pt-10 h-screen">
+            {history?.map((data, index) => (
+              <div
+                key={index}
+                onClick={() => {
+                  handleToggle(index);
+                  handleChatId(data.chat_id);
+                }}
+              >
+                <HistoryCard
+                  name={data.name}
+                  className={`cursor-pointer ${
+                    clickedCard === index ? "bg-gray-200" : "" // Change background color if clicked
+                  }`}
+                />
+              </div>
+            ))}
           </div>
 
           {user ? (
             <>
-              <div className="flex sticky bottom-0 bg-[#F9F9F9] px-5 pb-4 pt-6 gap-3 items-center">
+              <div className="flex sticky bottom-0 bg-[#F9F9F9] px-5 pb-4 pt-6 gap-4 items-center">
                 <Image
                   src={"/user.png"}
                   alt="user"
-                  width={40}
-                  height={40}
+                  width={38}
+                  height={38}
                   className="flex-none"
                 />
-                <div className="grow font-[500]">Tanay Srivastava</div>
+                <div className="grow text-lg tracking-wide font-[400]">{user.username}</div>
               </div>
             </>
           ) : (
@@ -263,8 +331,8 @@ export default function Home() {
         </ScrollArea>
         <main className="w-full h-screen flex flex-col justify-center items-center">
           <div className="w-full">
-            <div className="flex justify-between px-6 py-3 items-center">
-              <div className="text-xl">
+            <div className="flex justify-between px-5 py-5 items-center">
+              <div className="text-[22px]">
                 <span className="font-semibold dark:text-white">ChatGPT</span>{" "}
                 <span className="text-gray-300">3.5</span>
               </div>
@@ -286,20 +354,39 @@ export default function Home() {
           </div>
 
           <div className="w-full h-full flex flex-col justify-center items-center overflow-y-auto">
-            <ScrollArea className="grow  w-full pb-4 ">
-              <div className="flex justify-center">
-                <div className="min-w-[60%]">
-                  {messages?.map((message, key) => (
-                    <ChatResponse
-                      key={key}
-                      sender={message.sender}
-                      text={message.content}
-                      userImage={"/user.png"}
-                    />
-                  ))}
-                </div>
-              </div>
-
+            <ScrollArea className="grow h-full w-full pb-4 ">
+              {chatId ? (
+                <>
+                  {" "}
+                  <div className="flex justify-center">
+                    <div className="min-w-[60%]">
+                      {messages?.map((message, key) => (
+                        <ChatResponse
+                          key={key}
+                          sender={message.sender}
+                          text={message.content}
+                          userImage={"/user.png"}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className=" flex flex-col items-center  justify-center h-full mt-[15%] gap-5">
+                    <div className="bg-white p-2 border-2 rounded-full">
+                      <Image
+                        className="rounded-full border-1 text-black"
+                        src={"/logo.svg"}
+                        alt="Logo"
+                        width={40}
+                        height={40}
+                      />
+                    </div>
+                    <div className="font-bold text-3xl">How can I help you today?</div>
+                  </div>
+                </>
+              )}
             </ScrollArea>
             <div className="w-[60%] flex relative">
               <Input
@@ -325,25 +412,4 @@ export default function Home() {
       </div>
     </>
   );
-}
-
-{
-  /* <div
-        id="g_id_onload"
-        data-client_id="114615926093-lau02iplo5dcvgemjjpp5nbbqpn1c7fg.apps.googleusercontent.com"
-        data-context="signup"
-        data-ux_mode="popup"
-        data-callback={handleSignInWithGoogle}
-        data-auto_prompt="false"
-      ></div>
-
-      <div
-        className="g_id_signin"
-        data-type="standard"
-        data-shape="rectangular"
-        data-theme="outline"
-        data-text="signin_with"
-        data-size="large"
-        data-logo_alignment="left"
-      ></div> */
 }
