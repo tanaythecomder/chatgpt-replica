@@ -459,7 +459,7 @@ export default function Home() {
                 </div>
               ) : (
                 <>
-                  <div className=" flex flex-col items-center  justify-center h-full mt-[15%] gap-5">
+                  <div className=" flex flex-col items-center  justify-center mt-[15%] gap-5">
                     <div className="bg-white dark:bg-graycenter p-2 border-2 rounded-full">
                       <Image
                         className="rounded-full border-1 dark:invert "
