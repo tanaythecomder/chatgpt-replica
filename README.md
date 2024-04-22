@@ -4,6 +4,18 @@
 
 
 
+### Test Credentials
+
+For testing purposes, you can use the following dummy credentials:
+
+- **Email:** test@gmail.com
+- **Password:** test@1234
+
+
+
+
+
+
 ## Important note 📢: Transition to Gemini Pro 🚀
 
 We've integrated Gemini Pro for our AI requirements in this assignment. Due to limitations accessing OpenAI, we've opted for Gemini Pro. Thanks for your understanding!
