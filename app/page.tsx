@@ -43,8 +43,8 @@ export default function Home() {
     MessageResponse[] | undefined | null
   >(undefined);
   const [clickedCard, setClickedCard] = useState<number | null>(null);
-  const initialDarkMode = localStorage.getItem("darkMode") === "true";
-  const [dark, setDark] = useState<boolean>(initialDarkMode);
+
+  const [dark, setDark] = useState<boolean>(false);
 
   // useEffect(() => {
   //   try {
@@ -57,9 +57,14 @@ export default function Home() {
   // }, []);
 
   useEffect(() => {
-    console.log(dark);
-    localStorage.setItem("darkMode", JSON.stringify(dark));
-  }, [dark]);
+    try {
+      // Get the initial dark mode value from localStorage or default to false
+      const initialDarkMode = localStorage.getItem("darkMode") === "true";
+      setDark(initialDarkMode);
+    } catch (error) {
+      console.error("Error accessing localStorage:", error);
+    }
+  }, []);
 
   const [history, setHistory] = useState<
     HistoryResponse[] | undefined | null
@@ -132,9 +137,9 @@ export default function Home() {
         if (error) {
           throw error;
         }
-        console.log(data);
+        // console.log(data);
         const insertedChatId = data[0].chat_id;
-        console.log(insertedChatId);
+        // console.log(insertedChatId);
         setChatId(insertedChatId);
         setClickedCard(0);
         sessionStorage.setItem("chat_id", insertedChatId.toString());
@@ -188,7 +193,7 @@ export default function Home() {
           .select("chat_id, name,start_time")
           .eq("user_id", user?.id)
           .order("start_time", { ascending: false });
-        console.log(data);
+        // console.log(data);
         setHistory(data);
 
         if (error) console.log(error);
@@ -377,6 +382,7 @@ export default function Home() {
               <Switch
                 onClick={() => {
                   setDark((v) => !v);
+                  localStorage.setItem("darkMode", (!dark).toString());
                 }}
                 checked={dark}
               />
