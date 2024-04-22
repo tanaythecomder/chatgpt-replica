@@ -108,7 +108,7 @@ const Signup = () => {
                 <FormControl>
                   <Input
                     className="py-6 border-2"
-                    placeholder="Passoword"
+                    placeholder="Password"
                     {...field}
                   />
                 </FormControl>

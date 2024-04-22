@@ -73,9 +73,9 @@ export default function Home() {
 
   const handleToggle = (index: number) => {
     if (clickedCard === index) {
-      setClickedCard(null); // If already clicked, reset the state
+      // setClickedCard(null); 
     } else {
-      setClickedCard(index); // Set the clicked card ID
+      setClickedCard(index); 
     }
   };
   async function signOut() {
@@ -306,7 +306,7 @@ export default function Home() {
                 <HistoryCard
                   name={data.name}
                   className={`cursor-pointer ${
-                    clickedCard === index ? "bg-gray-200" : ""
+                    clickedCard === index ? "bg-gray-200 dark:bg-gray-800" : ""
                   }`}
                   onClick={async () => {
                     const { error } = await supabase

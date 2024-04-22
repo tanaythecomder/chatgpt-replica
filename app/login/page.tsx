@@ -72,7 +72,7 @@ const Login = () => {
     const formData = new FormData();
     formData.append("email", values.email);
     formData.append("password", values.password);
-    console.log(values);
+    // console.log(values);
     login(formData);
   }
   return (
@@ -119,7 +119,7 @@ const Login = () => {
                 <FormControl>
                   <Input
                     className="py-6 border-2"
-                    placeholder="Passoword"
+                    placeholder="Password"
                     {...field}
                   />
                 </FormControl>
