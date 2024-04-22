@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { createClient } from '@/utils/supabase/server'
-import func from '@/utils/openai/openai'
+import func from '@/utils/gemini/gemini'
 
 
 export default async function PrivatePage() {

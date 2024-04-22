@@ -20,6 +20,7 @@ import {
 import ChatResponse from "@/components/pageresponse/chatResponse";
 import HistoryCard from "@/components/pageresponse/history";
 import { Switch } from "@/components/ui/switch";
+import run from "@/utils/gemini/gemini";
 
 interface MessageResponse {
   message_id: any;
@@ -73,9 +74,9 @@ export default function Home() {
 
   const handleToggle = (index: number) => {
     if (clickedCard === index) {
-      // setClickedCard(null); 
+      // setClickedCard(null);
     } else {
-      setClickedCard(index); 
+      setClickedCard(index);
     }
   };
   async function signOut() {
@@ -153,6 +154,11 @@ export default function Home() {
         alert("login first");
       } else if (ongoingPromt.trim() !== "") {
         const chat_id = sessionStorage.getItem("chat_id");
+
+        console.log("....I am here");
+        const result = await run(ongoingPromt);
+        console.log(result);
+
         const { data, error } = await supabase
           .from("messages")
           .insert([
@@ -162,10 +168,17 @@ export default function Home() {
               timestamp: new Date(),
               content: ongoingPromt,
             },
+            {
+              chat_id: chat_id,
+              sender: "chatbot",
+              timestamp: new Date(),
+              content: result.result,
+            },
           ])
           .select();
+
         if (error) throw error;
-        console.log(data);
+        // console.log(data);
       } else return;
       setOngoingPromt("");
     } catch (error) {
@@ -266,6 +279,7 @@ export default function Home() {
 
   return (
     <>
+      {/* {console.log(process.env.NEXT_PUBLIC_API_GEMINI)} */}
       <main className={`flex h-screen ${dark ? "dark bg-graycenter" : ""} `}>
         <ScrollArea
           className="min-w-[21rem] max-w-[21rem]  rounded-md border p-4 bg-[#F9F9F9] dark:bg-grayside
@@ -380,7 +394,7 @@ export default function Home() {
               </div>
 
               <Switch
-              className="mr-3"
+                className="mr-3"
                 onClick={() => {
                   setDark((v) => !v);
                   localStorage.setItem("darkMode", (!dark).toString());
@@ -420,13 +434,14 @@ export default function Home() {
                 <>
                   {" "}
                   <div className="flex justify-center">
-                    <div className="min-w-[60%]">
+                    <div className="w-[60%]">
                       {messages?.map((message, key) => (
                         <ChatResponse
+                          
                           key={key}
                           sender={message.sender}
                           text={message.content}
-                          userImage={"/user.png"}
+                          userImage={message.sender==="chatbot"?"/logo.svg":"/user.png"}
                         />
                       ))}
                     </div>
@@ -463,7 +478,6 @@ export default function Home() {
                     handleSubmit();
                   }
                 }}
-
               />
               <TooltipProvider>
                 <Tooltip>
@@ -471,7 +485,10 @@ export default function Home() {
                     className="absolute right-1"
                     onClick={handleSubmit}
                   >
-                    <HiUpload aria-disabled={ongoingPromt.trim()===""?true:false} className="hover:text-white hover:bg-black text-[40px] m-3 bg-gray-100 dark:bg-gray5 dark:hover:bg-gray-100 dark:hover:text-black rounded-xl p-2" />
+                    <HiUpload
+                      aria-disabled={ongoingPromt.trim() === "" ? true : false}
+                      className="hover:text-white hover:bg-black text-[40px] m-3 bg-gray-100 dark:bg-gray5 dark:hover:bg-gray-100 dark:hover:text-black rounded-xl p-2"
+                    />
                   </TooltipTrigger>
                   <TooltipContent className="bg-black font-semibold  text-white text-base mb-3 rounded-2xl">
                     <p className="px-1 py-2">Send Message</p>

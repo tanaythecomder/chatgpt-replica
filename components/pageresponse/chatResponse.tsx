@@ -15,18 +15,18 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
   userImage=null
 }) => {
   return (
-    <div className="px-5 pt-6 dark:text-gray1">
-      <div className="flex gap-3 items-center">
+    <div className="px-5 pt-6 dark:text-gray1 w-full">
+      <div className="flex gap-3 items-center ">
         <Image
           src={!userImage? "/logo.svg":userImage}
           alt="user"
           width={30}
           height={30}
-          className="flex-none"
+          className={`flex-none  ${sender==="chatbot"?"dark:invert":""}`}
         />
         <div className="grow font-bold">{sender}</div>
       </div>
-      <div className=" pl-11 text-[15px] font-[500]">{text}</div>
+      <div className=" pl-11 text-[15px] font-[500] text-wrap w-full">{text}</div>
     </div>
   );
 };
