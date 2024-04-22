@@ -1,5 +1,18 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Ui Looks like this
 
+![image](https://github.com/tanaythecomder/chatgpt-replica/assets/105505153/9078817d-ef62-4dbc-a4c7-d1b4524374ab)
+
+
+
+## Important note 📢: Transition to Gemini Pro 🚀
+
+We've integrated Gemini Pro for our AI requirements in this assignment. Due to limitations accessing OpenAI, we've opted for Gemini Pro. Thanks for your understanding!
+
+
+
+
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 ## Getting Started
 
 First, run the development server:
