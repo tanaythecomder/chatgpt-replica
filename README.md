@@ -1,4 +1,7 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+##Ui Looks like this
+![image](https://github.com/tanaythecomder/chatgpt-replica/assets/105505153/9078817d-ef62-4dbc-a4c7-d1b4524374ab)
+
 
 ## Getting Started
 
