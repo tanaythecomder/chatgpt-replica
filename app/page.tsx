@@ -44,7 +44,7 @@ export default function Home() {
   >(undefined);
   const [clickedCard, setClickedCard] = useState<number | null>(null);
 
-  const [dark, setDark] = useState<boolean>(false);
+  const [dark, setDark] = useState<boolean>();
 
   // useEffect(() => {
   //   try {
@@ -120,7 +120,7 @@ export default function Home() {
 
   // function to handle prompt submit button
   async function handleSubmit() {
-    console.log(chatId);
+    // console.log(chatId);
     if (!chatId && user && ongoingPromt.trim() !== "") {
       try {
         const { data, error } = await supabase
@@ -176,12 +176,12 @@ export default function Home() {
   }
 
   useEffect(() => {
-    console.log("........in fetchmessage......");
+    // console.log("........in fetchmessage......");
     if (chatId && user) {
-      console.log("....fetching message......");
+      // console.log("....fetching message......");
       fetchMessages();
     } else {
-      console.log(".....if chatid is null");
+      // console.log(".....if chatid is null");
       setMessages(null);
     }
   }, [chatId]);
@@ -279,7 +279,7 @@ export default function Home() {
             <div className="flex items-center gap-2  ">
               <div className="bg-white p-[5px] border-2 rounded-full dark:bg-graycenter ">
                 <Image
-                  className="rounded-full border-1"
+                  className="rounded-full border-1 dark:invert"
                   src={"/logo.svg"}
                   alt="Logo"
                   width={23}
@@ -380,6 +380,7 @@ export default function Home() {
               </div>
 
               <Switch
+              className="mr-3"
                 onClick={() => {
                   setDark((v) => !v);
                   localStorage.setItem("darkMode", (!dark).toString());
@@ -434,9 +435,9 @@ export default function Home() {
               ) : (
                 <>
                   <div className=" flex flex-col items-center  justify-center h-full mt-[15%] gap-5">
-                    <div className="bg-white p-2 border-2 rounded-full">
+                    <div className="bg-white dark:bg-graycenter p-2 border-2 rounded-full">
                       <Image
-                        className="rounded-full border-1 text-black"
+                        className="rounded-full border-1 dark:invert "
                         src={"/logo.svg"}
                         alt="Logo"
                         width={40}

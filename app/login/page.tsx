@@ -82,7 +82,7 @@ const Login = () => {
         alt="logo"
         height={75}
         width={75}
-        className="filter grayscale invert"
+        className="filter grayscale"
       />
       <div className="text-black font-bold text-4xl pt-24">Welcome Back</div>
       <Form {...form}>
