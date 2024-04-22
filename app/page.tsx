@@ -492,7 +492,7 @@ export default function Home() {
             </div>
             <div className="w-[60%] flex relative">
               <textarea
-                className="resize-none pr-12 w-full flex mb-10 pt-6 rounded-2xl text-lg pl-8 outline-none ring-0 shadow-md dark:bg-graycenter dark:text-white dark:placeholder-gray1"
+                className="resize-none pr-12 w-full border border-gray-100 flex mb-10 pt-6 rounded-2xl text-lg pl-8 outline-none ring-0 shadow-lg dark:bg-graycenter dark:text-white dark:placeholder-gray1"
                 placeholder="Message ChatGPT.."
                 onChange={(e) => setOngoingPromt(e.target.value)}
                 value={ongoingPromt}
