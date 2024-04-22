@@ -437,7 +437,7 @@ export default function Home() {
 
           <div className="w-full h-full flex flex-col justify-center items-center overflow-y-auto">
             <div
-              className="grow h-full w-full pb-4 overflow-y-auto"
+              className="grow h-full w-full pb-10 overflow-y-auto"
               ref={scrollAreaRef}
             >
               {chatId ? (
@@ -475,25 +475,42 @@ export default function Home() {
                   </div>
                 </>
               )}
-             
+              {/* <div className="flex justify-center">
+                <div className="w-[60%]">
+                  {messages?.map((message, key) => (
+                    <ChatResponse
+                      key={key}
+                      sender={message.sender}
+                      text={message.content}
+                      userImage={
+                        message.sender === "chatbot" ? "/logo.svg" : "/user.png"
+                      }
+                    />
+                  ))}
+                </div>
+              </div> */}
             </div>
             <div className="w-[60%] flex relative">
-              <Input
-                className="  flex mb-10 py-8 rounded-2xl text-lg pl-8 outline-none ring-0 shadow-md dark:bg-graycenter dark:text-white dark:placeholder-gray1"
-                type="email"
+              <textarea
+                className="resize-none pr-12 w-full flex mb-10 pt-6 rounded-2xl text-lg pl-8 outline-none ring-0 shadow-md dark:bg-graycenter dark:text-white dark:placeholder-gray1"
                 placeholder="Message ChatGPT.."
                 onChange={(e) => setOngoingPromt(e.target.value)}
                 value={ongoingPromt}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     handleSubmit();
                   }
+                }}
+                style={{
+                  minHeight: "48px ", // Set a default minimum height
+                  maxHeight: "200px", // Set a maximum height to prevent the input from growing too large
+                  overflowY: 'auto' // Enable scrolling when the content exceeds the height
                 }}
               />
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger
-                    className="absolute right-1"
+                    className="absolute right-1 bottom-12"
                     onClick={handleSubmit}
                   >
                     <HiUpload

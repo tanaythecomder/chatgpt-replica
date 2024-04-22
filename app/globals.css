@@ -74,3 +74,22 @@
       @apply bg-background text-foreground;
     }
   }
+
+
+
+  /* Scrollbar Track */
+::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+  background-color: transparent; /* Track background color */
+}
+
+/* Scrollbar Handle */
+::-webkit-scrollbar-thumb {
+  background-color: #f1efef; /* Scrollbar handle color */
+  border-radius: 4px; /* Rounded corners */
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #c1bebe; /* Scrollbar handle color on hover */
+}
