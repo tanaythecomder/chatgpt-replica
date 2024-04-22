@@ -72,6 +72,13 @@ export default function Home() {
   >();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // Scroll to bottom on component update
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   const handleToggle = (index: number) => {
     if (clickedCard === index) {
       // setClickedCard(null);
@@ -429,7 +436,7 @@ export default function Home() {
           </div>
 
           <div className="w-full h-full flex flex-col justify-center items-center overflow-y-auto">
-            <ScrollArea className="grow h-full w-full pb-4 ">
+            <ScrollArea className="grow h-full w-full pb-4" ref={scrollAreaRef}>
               {chatId ? (
                 <>
                   {" "}
@@ -437,11 +444,14 @@ export default function Home() {
                     <div className="w-[60%]">
                       {messages?.map((message, key) => (
                         <ChatResponse
-                          
                           key={key}
                           sender={message.sender}
                           text={message.content}
-                          userImage={message.sender==="chatbot"?"/logo.svg":"/user.png"}
+                          userImage={
+                            message.sender === "chatbot"
+                              ? "/logo.svg"
+                              : "/user.png"
+                          }
                         />
                       ))}
                     </div>
