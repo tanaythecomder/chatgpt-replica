@@ -131,15 +131,18 @@ const Login = () => {
                       className="py-6 border-2 w-full"
                       placeholder="Password"
                       {...field}
-                      onChange={(e) => setPassword(e.target.value)}
                       type={showPassword ? "text" : "password"}
-                      value={password}
                     />
 
-                    <button onClick={togglePasswordVisibility} className="absolute right-4 top-4 text-xl">
-
-                      {showPassword ? <><BiSolidHide/></> : <BiSolidShow />} 
-                    </button>
+                    <div className="absolute right-4 top-4 text-xl">
+                      {showPassword ? (
+                        <>
+                          <BiSolidHide onClick={togglePasswordVisibility} />
+                        </>
+                      ) : (
+                        <BiSolidShow onClick={togglePasswordVisibility} />
+                      )}
+                    </div>
                   </div>
                 </FormControl>
                 {/* <FormDescription>

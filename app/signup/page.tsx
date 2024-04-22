@@ -25,7 +25,7 @@ const formSchema = z.object({
     message: "Please provide valid email",
   }),
   password: z.string().min(8, {
-    message: "Password must be at least 2 characters.",
+    message: "Password must be at least 8 characters.",
   }),
   username: z.string().min(5, {
     message: "Provide valid username",
@@ -116,23 +116,18 @@ const Signup = () => {
                       className="py-6 border-2 w-full"
                       placeholder="Password"
                       {...field}
-                      onChange={(e) => setPassword(e.target.value)}
+                      // onChange={(e) => setPassword(e.target.value)}
                       type={showPassword ? "text" : "password"}
-                      value={password}
                     />
-
-                    <button
-                      onClick={togglePasswordVisibility}
-                      className="absolute right-4 top-4 text-xl"
-                    >
+                    <div className="absolute right-4 top-4 text-xl">
                       {showPassword ? (
                         <>
-                          <BiSolidHide />
+                          <BiSolidHide onClick={togglePasswordVisibility} />
                         </>
                       ) : (
-                        <BiSolidShow />
+                        <BiSolidShow onClick={togglePasswordVisibility} />
                       )}
-                    </button>
+                    </div>
                   </div>
                 </FormControl>
 
