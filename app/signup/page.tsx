@@ -13,11 +13,12 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { z } from "zod";
 import { signup } from "./action";
+import { BiSolidHide, BiSolidShow } from "react-icons/bi";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -32,6 +33,12 @@ const formSchema = z.object({
 });
 
 const Signup = () => {
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [password, setPassword] = useState<string>("");
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,14 +48,13 @@ const Signup = () => {
     },
   });
 
-
   function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData();
     formData.append("email", values.email);
     formData.append("password", values.password);
     formData.append("username", values.username);
 
-    signup(formData); 
+    signup(formData);
   }
   return (
     <div className="flex flex-col items-center justify-center pt-[5%]  tracking-wide">
@@ -57,7 +63,7 @@ const Signup = () => {
         alt="logo"
         height={75}
         width={75}
-        className="filter grayscale invert"
+        className="filter grayscale"
       />
       <div className="text-black font-bold text-4xl pt-24">Welcome Back</div>
       <Form {...form}>
@@ -70,7 +76,6 @@ const Signup = () => {
             name="username"
             render={({ field }) => (
               <FormItem>
-               
                 <FormControl>
                   <Input
                     className="py-6 border-2"
@@ -78,7 +83,7 @@ const Signup = () => {
                     {...field}
                   />
                 </FormControl>
-                
+
                 <FormMessage />
               </FormItem>
             )}
@@ -106,11 +111,29 @@ const Signup = () => {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input
-                    className="py-6 border-2"
-                    placeholder="Password"
-                    {...field}
-                  />
+                  <div className="relative">
+                    <Input
+                      className="py-6 border-2 w-full"
+                      placeholder="Password"
+                      {...field}
+                      onChange={(e) => setPassword(e.target.value)}
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                    />
+
+                    <button
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-4 top-4 text-xl"
+                    >
+                      {showPassword ? (
+                        <>
+                          <BiSolidHide />
+                        </>
+                      ) : (
+                        <BiSolidShow />
+                      )}
+                    </button>
+                  </div>
                 </FormControl>
 
                 <FormMessage />

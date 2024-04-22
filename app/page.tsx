@@ -463,6 +463,7 @@ export default function Home() {
                     handleSubmit();
                   }
                 }}
+
               />
               <TooltipProvider>
                 <Tooltip>
@@ -470,7 +471,7 @@ export default function Home() {
                     className="absolute right-1"
                     onClick={handleSubmit}
                   >
-                    <HiUpload className="hover:text-white hover:bg-black text-[40px] m-3 bg-gray-100 dark:bg-gray5 dark:hover:bg-gray-100 dark:hover:text-black rounded-xl p-2" />
+                    <HiUpload aria-disabled={ongoingPromt.trim()===""?true:false} className="hover:text-white hover:bg-black text-[40px] m-3 bg-gray-100 dark:bg-gray5 dark:hover:bg-gray-100 dark:hover:text-black rounded-xl p-2" />
                   </TooltipTrigger>
                   <TooltipContent className="bg-black font-semibold  text-white text-base mb-3 rounded-2xl">
                     <p className="px-1 py-2">Send Message</p>

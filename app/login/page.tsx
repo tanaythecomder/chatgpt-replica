@@ -13,11 +13,14 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { login } from "./action";
 import { createClient } from "@/utils/supabase/client";
+import { BiSolidHide } from "react-icons/bi";
+import { BiSolidShow } from "react-icons/bi";
+
 const formSchema = z.object({
   email: z.string().email({
     message: "Please provide valid email",
@@ -49,6 +52,12 @@ const formSchema = z.object({
 // };
 
 const Login = () => {
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [password, setPassword] = useState<string>("");
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
   // useEffect(() => {
   //   const script = document.createElement("script");
   //   script.src = "https://accounts.google.com/gsi/client";
@@ -117,11 +126,21 @@ const Login = () => {
               <FormItem>
                 {/* <FormLabel>Username</FormLabel> */}
                 <FormControl>
-                  <Input
-                    className="py-6 border-2"
-                    placeholder="Password"
-                    {...field}
-                  />
+                  <div className="relative">
+                    <Input
+                      className="py-6 border-2 w-full"
+                      placeholder="Password"
+                      {...field}
+                      onChange={(e) => setPassword(e.target.value)}
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                    />
+
+                    <button onClick={togglePasswordVisibility} className="absolute right-4 top-4 text-xl">
+
+                      {showPassword ? <><BiSolidHide/></> : <BiSolidShow />} 
+                    </button>
+                  </div>
                 </FormControl>
                 {/* <FormDescription>
                   This is your public display name.
