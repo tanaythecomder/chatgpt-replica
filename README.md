@@ -4,7 +4,7 @@
 
 
 
-📢 ## Important note: Transition to Gemini Pro 🚀
+## Important note 📢: Transition to Gemini Pro 🚀
 
 We've integrated Gemini Pro for our AI requirements in this assignment. Due to limitations accessing OpenAI, we've opted for Gemini Pro. Thanks for your understanding!
 
