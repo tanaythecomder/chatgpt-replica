@@ -18,13 +18,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { login } from "./action";
 import { createClient } from "@/utils/supabase/client";
-
-// declare global {
-//   interface Window {
-//     handleSignInWithGoogle: (response: any) => Promise<void>; // Declare handleSignInWithGoogle globally
-//   }
-// }
-
 const formSchema = z.object({
   email: z.string().email({
     message: "Please provide valid email",
@@ -33,27 +26,27 @@ const formSchema = z.object({
     message: "Password must be at least 2 characters.",
   }),
 });
-const handleSignInWithGoogle = async (response: any) => {
-  const supabase = createClient(); // Create Supabase client
+// const handleSignInWithGoogle = async (response: any) => {
+//   const supabase = createClient(); // Create Supabase client
 
-  try {
-    const { data, error } = await supabase.auth.signInWithIdToken({
-      provider: "google",
-      token: response.credential,
-      nonce: "NONCE", // Must be the same one as provided in data-nonce (if any)
-    });
+//   try {
+//     const { data, error } = await supabase.auth.signInWithIdToken({
+//       provider: "google",
+//       token: response.credential,
+//       nonce: "NONCE", // Must be the same one as provided in data-nonce (if any)
+//     });
 
-    if (error) {
-      console.error("Error signing in with Google:", error.message);
-    } else {
-      console.log("User signed in with Google:", data.user);
-      // Redirect or perform additional actions after successful sign-in
-    }
-  } catch (error) {
-    console.error("Error signing in with Google:", error);
-    // Handle error
-  }
-};
+//     if (error) {
+//       console.error("Error signing in with Google:", error.message);
+//     } else {
+//       console.log("User signed in with Google:", data.user);
+//       // Redirect or perform additional actions after successful sign-in
+//     }
+//   } catch (error) {
+//     console.error("Error signing in with Google:", error);
+//     // Handle error
+//   }
+// };
 
 const Login = () => {
   // useEffect(() => {

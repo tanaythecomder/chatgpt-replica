@@ -15,7 +15,7 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
   userImage=null
 }) => {
   return (
-    <div className="px-5 pt-6">
+    <div className="px-5 pt-6 dark:text-gray1">
       <div className="flex gap-3 items-center">
         <Image
           src={!userImage? "/logo.svg":userImage}

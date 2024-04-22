@@ -41,14 +41,14 @@ const Signup = () => {
     },
   });
 
-  // 2. Define a submit handler.
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData();
     formData.append("email", values.email);
     formData.append("password", values.password);
     formData.append("username", values.username);
 
-    signup(formData); // Call the signup function with the form data
+    signup(formData); 
   }
   return (
     <div className="flex flex-col items-center justify-center pt-[5%]  tracking-wide">
@@ -70,7 +70,7 @@ const Signup = () => {
             name="username"
             render={({ field }) => (
               <FormItem>
-                {/* <FormLabel>email</FormLabel> */}
+               
                 <FormControl>
                   <Input
                     className="py-6 border-2"
@@ -78,9 +78,7 @@ const Signup = () => {
                     {...field}
                   />
                 </FormControl>
-                {/* <FormDescription>
-              This is your public display name.
-            </FormDescription> */}
+                
                 <FormMessage />
               </FormItem>
             )}
@@ -90,7 +88,6 @@ const Signup = () => {
             name="email"
             render={({ field }) => (
               <FormItem>
-                {/* <FormLabel>email</FormLabel> */}
                 <FormControl>
                   <Input
                     className="py-6 border-2"
@@ -98,9 +95,7 @@ const Signup = () => {
                     {...field}
                   />
                 </FormControl>
-                {/* <FormDescription>
-                  This is your public display name.
-                </FormDescription> */}
+
                 <FormMessage />
               </FormItem>
             )}
@@ -110,7 +105,6 @@ const Signup = () => {
             name="password"
             render={({ field }) => (
               <FormItem>
-                {/* <FormLabel>Username</FormLabel> */}
                 <FormControl>
                   <Input
                     className="py-6 border-2"
@@ -118,9 +112,7 @@ const Signup = () => {
                     {...field}
                   />
                 </FormControl>
-                {/* <FormDescription>
-                  This is your public display name.
-                </FormDescription> */}
+
                 <FormMessage />
               </FormItem>
             )}

@@ -10,8 +10,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { AiOutlineLogout } from "react-icons/ai";
 import { HiUpload } from "react-icons/hi";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 import ChatResponse from "@/components/pageresponse/chatResponse";
 import HistoryCard from "@/components/pageresponse/history";
+import { Switch } from "@/components/ui/switch";
 
 interface MessageResponse {
   message_id: any;
@@ -35,6 +43,23 @@ export default function Home() {
     MessageResponse[] | undefined | null
   >(undefined);
   const [clickedCard, setClickedCard] = useState<number | null>(null);
+  const initialDarkMode = localStorage.getItem("darkMode") === "true";
+  const [dark, setDark] = useState<boolean>(initialDarkMode);
+
+  // useEffect(() => {
+  //   try {
+  //     // Get the initial dark mode value from localStorage or default to false
+  //     const initialDarkMode = localStorage.getItem("darkMode") === "true";
+  //     setDark(initialDarkMode);
+  //   } catch (error) {
+  //     console.error("Error accessing localStorage:", error);
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    console.log(dark);
+    localStorage.setItem("darkMode", JSON.stringify(dark));
+  }, [dark]);
 
   const [history, setHistory] = useState<
     HistoryResponse[] | undefined | null
@@ -90,6 +115,7 @@ export default function Home() {
 
   // function to handle prompt submit button
   async function handleSubmit() {
+    console.log(chatId);
     if (!chatId && user && ongoingPromt.trim() !== "") {
       try {
         const { data, error } = await supabase
@@ -144,7 +170,6 @@ export default function Home() {
     if (chatId) fetchMessages();
   }
 
-  // fetching the messages from the database
   useEffect(() => {
     console.log("........in fetchmessage......");
     if (chatId && user) {
@@ -155,8 +180,6 @@ export default function Home() {
       setMessages(null);
     }
   }, [chatId]);
-
-  // used to fetch side bar history
   useEffect(() => {
     async function fetchHistory() {
       try {
@@ -175,10 +198,9 @@ export default function Home() {
     }
     if (user) fetchHistory();
   }, [user, chatId]);
-
-  // Import your supabase client
-
   useEffect(() => {
+    //  const value: boolean = JSON.parse(storedDarkMode as string);
+
     async function fetchData() {
       try {
         const { data: userData, error: userError } =
@@ -216,7 +238,6 @@ export default function Home() {
 
     fetchData();
   }, []);
-
   useEffect(() => {
     const scrollToBottom = () => {
       if (scrollAreaRef.current) {
@@ -240,27 +261,27 @@ export default function Home() {
 
   return (
     <>
-      <div className=" flex h-screen">
+      <main className={`flex h-screen ${dark ? "dark bg-graycenter" : ""} `}>
         <ScrollArea
-          className="min-w-[21rem] max-w-[21rem]  rounded-md border p-4 bg-[#F9F9F9] 
+          className="min-w-[21rem] max-w-[21rem]  rounded-md border p-4 bg-[#F9F9F9] dark:bg-grayside
         "
         >
           {/* sidebar nav bar */}
           <div
             onClick={() => handleChatId()}
-            className="bg-[#F9F9F9] hover:bg-gray-200 hover:rounded-xl py-2 px-2 flex justify-between items-center sticky top-0 "
+            className="hover:bg-gray-200 dark:hover:bg-gray-800 bg-[#F9F9F9] hover:rounded-xl py-2 px-2 flex justify-between items-center sticky top-0 dark:bg-grayside dark:text-white "
           >
-            <div className="flex items-center gap-2 ">
-              <div className="bg-white p-[5px] border-2 rounded-full">
+            <div className="flex items-center gap-2  ">
+              <div className="bg-white p-[5px] border-2 rounded-full dark:bg-graycenter ">
                 <Image
-                  className="rounded-full border-1 text-black"
+                  className="rounded-full border-1"
                   src={"/logo.svg"}
                   alt="Logo"
                   width={23}
                   height={23}
                 />
               </div>
-              <div className="text-black font-semibold">New Chat</div>
+              <div className="font-semibold  dark:text-gray2">New Chat</div>
             </div>
             <div className="pr-5">
               <FiEdit className="text-xl " />
@@ -282,6 +303,17 @@ export default function Home() {
                   className={`cursor-pointer ${
                     clickedCard === index ? "bg-gray-200" : ""
                   }`}
+                  onClick={async () => {
+                    const { error } = await supabase
+                      .from("chats")
+                      .delete()
+                      .eq("chat_id", data.chat_id);
+                    if (error) {
+                      console.log(error);
+                    }
+                    if (chatId === data.chat_id) setChatId(null);
+                    else setChatId(chatId);
+                  }}
                 />
               </div>
             ))}
@@ -289,7 +321,7 @@ export default function Home() {
 
           {user ? (
             <>
-              <div className="flex sticky bottom-0 bg-[#F9F9F9] px-5 pb-4 pt-6 gap-4 items-center">
+              <div className="flex sticky bottom-0 bg-[#F9F9F9] px-5 pb-4 pt-6 gap-4 items-center dark:bg-grayside">
                 <Image
                   src={"/user.png"}
                   alt="user"
@@ -297,29 +329,31 @@ export default function Home() {
                   height={38}
                   className="flex-none"
                 />
-                <div className="grow text-lg tracking-wide font-[400]">
+                <div className="grow text-lg tracking-wide font-[400] dark:text-white">
                   {user.username}
                 </div>
               </div>
             </>
           ) : (
             <>
-              <div className="text-base space-y-1 sticky bottom-0 bg-[#F9F9F9] pl-3 pr-2 py-4 tracking-wide">
-                <div className="font-bold text-black ">Sign up or log in </div>
-                <div className="text-gray-400">
+              <div className="text-base space-y-1 sticky bottom-0 bg-[#F9F9F9] pl-3 pr-2 py-4 tracking-wide dark:bg-grayside dark:text-white">
+                <div className="font-bold dark:text-gray2 ">
+                  Sign up or log in{" "}
+                </div>
+                <div className="text-gray-400 dark:text-gray1">
                   Save your chat history, share chats, and personalize your
                   experience.
                 </div>
                 <div className="pt-2">
                   <Link href={"/signup"}>
-                    <Button className="w-full bg-[#10a37f] font-semibold hover:bg-[#327262] rounded-xl py-6">
+                    <Button className="w-full bg-[#10a37f] font-semibold hover:bg-[#327262] rounded-xl py-6 dark:text-white ">
                       Signup
                     </Button>
                   </Link>
                 </div>
                 <div className="pt-2">
                   <Link href={"/login"}>
-                    <Button className="w-full border-2 bg-white font-semibold text-black hover:bg-slate-100 rounded-xl py-6">
+                    <Button className="w-full border-2 bg-white font-semibold text-black hover:bg-slate-100 rounded-xl py-6  dark:text-gray2 dark:bg-graycenter">
                       Login
                     </Button>
                   </Link>
@@ -328,25 +362,46 @@ export default function Home() {
             </>
           )}
         </ScrollArea>
-        <main className="w-full h-screen flex flex-col justify-center items-center">
+        <main className="w-full h-screen flex flex-col justify-center items-center dark:bg-graycenter">
           <div className="w-full">
-            <div className="flex justify-between px-5 py-5 items-center">
-              <div className="text-[22px]">
-                <span className="font-semibold dark:text-white">ChatGPT</span>{" "}
-                <span className="text-gray-300">3.5</span>
+            <div className="flex px-5 py-5 items-center">
+              <div className="grow ">
+                <span className="text-[22px] font-semibold dark:text-white tracking-tight ">
+                  ChatGPT{" "}
+                </span>
+                <span className="text-gray3 text-[21px] dark:text-gray1 font-semibold ">
+                  3.5
+                </span>
               </div>
+
+              <Switch
+                onClick={() => {
+                  setDark((v) => !v);
+                }}
+                checked={dark}
+              />
+
               {user ? (
-                <>
-                  <Button
-                    className="bg-white text-black border-2 shadow-none rounded-xl "
-                    onClick={signOut}
-                  >
-                    <AiOutlineLogout className="text-xl" />
-                  </Button>
-                </>
+                <div className="">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="mr-3">
+                        <Button
+                          className="bg-white text-black border-2 shadow-none rounded-xl dark:bg-gray5  "
+                          onClick={signOut}
+                        >
+                          <AiOutlineLogout className="text-xl dark-t" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-sm">click to log out</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               ) : (
                 <>
-                  <div></div>
+                  <></>
                 </>
               )}
             </div>
@@ -382,7 +437,7 @@ export default function Home() {
                         height={40}
                       />
                     </div>
-                    <div className="font-bold text-3xl">
+                    <div className="font-bold text-3xl dark:text-gray1">
                       How can I help you today?
                     </div>
                   </div>
@@ -391,7 +446,7 @@ export default function Home() {
             </ScrollArea>
             <div className="w-[60%] flex relative">
               <Input
-                className="  flex mb-10 py-8 rounded-2xl text-lg pl-8 outline-none ring-0 shadow-md"
+                className="  flex mb-10 py-8 rounded-2xl text-lg pl-8 outline-none ring-0 shadow-md dark:bg-graycenter dark:text-white dark:placeholder-gray1"
                 type="email"
                 placeholder="Message ChatGPT.."
                 onChange={(e) => setOngoingPromt(e.target.value)}
@@ -402,15 +457,23 @@ export default function Home() {
                   }
                 }}
               />
-
-              <HiUpload
-                onClick={handleSubmit}
-                className=" hover:text-white hover:bg-black text-[40px] m-3 bg-gray-100 rounded-xl p-2 absolute right-1"
-              />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger
+                    className="absolute right-1"
+                    onClick={handleSubmit}
+                  >
+                    <HiUpload className="hover:text-white hover:bg-black text-[40px] m-3 bg-gray-100 dark:bg-gray5 dark:hover:bg-gray-100 dark:hover:text-black rounded-xl p-2" />
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-black font-semibold  text-white text-base mb-3 rounded-2xl">
+                    <p className="px-1 py-2">Send Message</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
         </main>
-      </div>
+      </main>
     </>
   );
 }
