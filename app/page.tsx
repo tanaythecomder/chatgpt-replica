@@ -436,27 +436,27 @@ export default function Home() {
           </div>
 
           <div className="w-full h-full flex flex-col justify-center items-center overflow-y-auto">
-            <ScrollArea className="grow h-full w-full pb-4" ref={scrollAreaRef}>
+            <div
+              className="grow h-full w-full pb-4 overflow-y-auto"
+              ref={scrollAreaRef}
+            >
               {chatId ? (
-                <>
-                  {" "}
-                  <div className="flex justify-center">
-                    <div className="w-[60%]">
-                      {messages?.map((message, key) => (
-                        <ChatResponse
-                          key={key}
-                          sender={message.sender}
-                          text={message.content}
-                          userImage={
-                            message.sender === "chatbot"
-                              ? "/logo.svg"
-                              : "/user.png"
-                          }
-                        />
-                      ))}
-                    </div>
+                <div className="flex justify-center">
+                  <div className="w-[60%]">
+                    {messages?.map((message, key) => (
+                      <ChatResponse
+                        key={key}
+                        sender={message.sender}
+                        text={message.content}
+                        userImage={
+                          message.sender === "chatbot"
+                            ? "/logo.svg"
+                            : "/user.png"
+                        }
+                      />
+                    ))}
                   </div>
-                </>
+                </div>
               ) : (
                 <>
                   <div className=" flex flex-col items-center  justify-center h-full mt-[15%] gap-5">
@@ -475,7 +475,8 @@ export default function Home() {
                   </div>
                 </>
               )}
-            </ScrollArea>
+             
+            </div>
             <div className="w-[60%] flex relative">
               <Input
                 className="  flex mb-10 py-8 rounded-2xl text-lg pl-8 outline-none ring-0 shadow-md dark:bg-graycenter dark:text-white dark:placeholder-gray1"
