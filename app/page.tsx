@@ -165,10 +165,9 @@ export default function Home() {
         const chat_id = sessionStorage.getItem("chat_id");
 
         console.log("....I am here");
-        const result = await run(ongoingPromt);
-        console.log(result);
 
-        const { data, error } = await supabase
+        // add try and catch to handle error
+        const { error: promptError } = await supabase
           .from("messages")
           .insert([
             {
@@ -177,16 +176,26 @@ export default function Home() {
               timestamp: new Date(),
               content: ongoingPromt,
             },
-            {
-              chat_id: chat_id,
-              sender: "chatbot",
-              timestamp: new Date(),
-              content: result.result,
-            },
           ])
           .select();
+        const result = await run(ongoingPromt);
+        if (result) {
+          console.log(result);
 
-        if (error) throw error;
+          const { data, error } = await supabase
+            .from("messages")
+            .insert([
+              {
+                chat_id: chat_id,
+                sender: "chatbot",
+                timestamp: new Date(),
+                content: result.result,
+              },
+            ])
+            .select();
+
+          if (error) throw error;
+        }
         // console.log(data);
       } else return;
       setOngoingPromt("");
@@ -333,7 +342,7 @@ export default function Home() {
                 <HistoryCard
                   name={data.name}
                   className={`cursor-pointer ${
-                    clickedCard === index ? "bg-gray-200 dark:bg-gray-800" : ""
+                    clickedCard === index ? "bg-gray-200  dark:bg-gray-700" : ""
                   }`}
                   onClick={async () => {
                     const { error } = await supabase
@@ -457,7 +466,7 @@ export default function Home() {
                         userImage={
                           message.sender === "chatbot"
                             ? "/logo.svg"
-                            : "/user.png"
+                            : user?.avatar_url
                         }
                       />
                     ))}
@@ -481,20 +490,6 @@ export default function Home() {
                   </div>
                 </>
               )}
-              {/* <div className="flex justify-center">
-                <div className="w-[60%]">
-                  {messages?.map((message, key) => (
-                    <ChatResponse
-                      key={key}
-                      sender={message.sender}
-                      text={message.content}
-                      userImage={
-                        message.sender === "chatbot" ? "/logo.svg" : "/user.png"
-                      }
-                    />
-                  ))}
-                </div>
-              </div> */}
             </div>
             <div className="w-[60%] flex relative">
               <textarea
