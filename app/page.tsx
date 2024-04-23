@@ -35,9 +35,11 @@ interface HistoryResponse {
 
 export default function Home() {
   const supabase = createClient();
-  const [user, setUser] = useState<null | { id: string; username: string }>(
-    null
-  );
+  const [user, setUser] = useState<null | {
+    id: string;
+    username: string;
+    avatar_url?: string;
+  }>(null);
   const [ongoingPromt, setOngoingPromt] = useState<string>("");
   const [chatId, setChatId] = useState<string | null>();
   const [messages, setMessages] = useState<
@@ -240,7 +242,7 @@ export default function Home() {
 
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("username")
+          .select("username,full_name, avatar_url")
           .eq("id", userId)
           .single();
 
@@ -250,7 +252,11 @@ export default function Home() {
         }
 
         // Set username in state
-        setUser({ id: userId, username: profileData.username });
+        setUser({
+          id: userId,
+          username: profileData.username || profileData.full_name,
+          avatar_url: profileData.avatar_url,
+        });
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -348,12 +354,12 @@ export default function Home() {
           {user ? (
             <>
               <div className="flex sticky bottom-0 bg-[#F9F9F9] px-5 pb-4 pt-6 gap-4 items-center dark:bg-grayside">
-                <Image
-                  src={"/user.png"}
+                <img
+                  src={user?.avatar_url || "/user.png"}
                   alt="user"
                   width={38}
                   height={38}
-                  className="flex-none"
+                  className="flex-none rounded-full"
                 />
                 <div className="grow text-lg tracking-wide font-[400] dark:text-white">
                   {user.username}
@@ -442,7 +448,7 @@ export default function Home() {
             >
               {chatId ? (
                 <div className="flex justify-center">
-                  <div className="w-[60%]">
+                  <div className="w-[60%] space-y-3">
                     {messages?.map((message, key) => (
                       <ChatResponse
                         key={key}
@@ -504,7 +510,7 @@ export default function Home() {
                 style={{
                   minHeight: "48px ", // Set a default minimum height
                   maxHeight: "200px", // Set a maximum height to prevent the input from growing too large
-                  overflowY: 'auto' // Enable scrolling when the content exceeds the height
+                  overflowY: "auto", // Enable scrolling when the content exceeds the height
                 }}
               />
               <TooltipProvider>

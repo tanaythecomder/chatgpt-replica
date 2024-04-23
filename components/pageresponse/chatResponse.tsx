@@ -10,7 +10,13 @@ import rehypeRaw from "rehype-raw";
 import { vs } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { dracula } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { MdOutlineContentCopy } from "react-icons/md";
+
+import {
+  docco,
+  dracula,
+  solarizedLight,
+} from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 interface CodeBlockProps {
   language: string;
@@ -59,24 +65,45 @@ const ChatResponse: React.FC<ChatResponseProps> = ({
         {text}
       </ReactMarkdown> */}
       <Markdown
-        className=" pl-11 text-[15px] font-[500] text-wrap w-full"
+        className="pl-11 text-[16px] font-[500] text-wrap w-full"
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
         components={{
           code({ node, inline, className, children, ...props }: any) {
+            let language = ""; // Variable to store the language
+
             const match = /language-(\w+)/.exec(className || "");
+            if (!inline) {
+              if (match) {
+                language = match[1]; // Extract and store the language
+              }
+            }
 
             return !inline && match ? (
-              <SyntaxHighlighter
-                style={dracula}
-                PreTag="div"
-                language={match[1]}
-                {...props}
-              >
-                {String(children).replace(/\n$/, "")}
-              </SyntaxHighlighter>
+              <div className="mb-8 shadow-lg mt-7">
+                <div className="mt-3 px-5 rounded-t-lg text-sm bg-[#2F2F2F] text-gray1 flex justify-between p-3">
+                  <div>{language}</div>
+                  <div className="flex items-center text-[15px]"><MdOutlineContentCopy/> Copy code</div>
+                </div>
+                <SyntaxHighlighter
+                  style={vscDarkPlus}
+                  PreTag="div"
+                  language={match[1]}
+                  {...props}
+                  customStyle={{
+                    fontSize: "1.2rem",
+                    borderRadius: "0px 0px 6px 6px",
+                    padding: "20px",
+                    marginTop: "0px",
+                    marginBottom:"10px",
+                    backgroundColor: "black",
+                  }}
+                >
+                  {String(children).replace(/\n$/, "")}
+                </SyntaxHighlighter>
+              </div>
             ) : (
-              <code className={className} {...props}>
+              <code className={className + ""} {...props}>
                 {children}
               </code>
             );

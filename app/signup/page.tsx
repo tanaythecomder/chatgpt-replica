@@ -19,6 +19,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { signup } from "./action";
 import { BiSolidHide, BiSolidShow } from "react-icons/bi";
+import { loginWithGoogle } from "../login/action";
+import SignInGoogleButton from "@/components/signupcomponents/SignInGoogleButton";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -57,7 +59,7 @@ const Signup = () => {
     signup(formData);
   }
   return (
-    <div className="flex flex-col items-center justify-center pt-[5%]  tracking-wide">
+    <div className="flex flex-col items-center justify-center pt-[5%] space-y-2  tracking-wide">
       <Image
         src={"/logo.svg"}
         alt="logo"
@@ -146,6 +148,8 @@ const Signup = () => {
           Login
         </Link>
       </div>
+      <div>or</div>
+      <SignInGoogleButton onClick={() => loginWithGoogle()} />
     </div>
   );
 };
