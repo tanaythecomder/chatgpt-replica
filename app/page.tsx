@@ -1,7 +1,5 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { createClient } from "@/utils/supabase/client";
 import { FiEdit } from "react-icons/fi";
@@ -16,23 +14,20 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
 import ChatResponse from "@/components/pageresponse/chatResponse";
 import HistoryCard from "@/components/pageresponse/history";
 import { Switch } from "@/components/ui/switch";
 import run from "@/utils/gemini/gemini";
-
 interface MessageResponse {
-  message_id: any;
+  message_id?: any;
   chat_id?: any;
-  sender: any;
-  content: any;
+  sender: string;
+  content: string;
 }
 interface HistoryResponse {
   chat_id: any;
   name: any;
 }
-
 export default function Home() {
   const supabase = createClient();
   const [user, setUser] = useState<null | {
@@ -46,19 +41,11 @@ export default function Home() {
     MessageResponse[] | undefined | null
   >(undefined);
   const [clickedCard, setClickedCard] = useState<number | null>(null);
-
   const [dark, setDark] = useState<boolean>();
-
-  // useEffect(() => {
-  //   try {
-  //     // Get the initial dark mode value from localStorage or default to false
-  //     const initialDarkMode = localStorage.getItem("darkMode") === "true";
-  //     setDark(initialDarkMode);
-  //   } catch (error) {
-  //     console.error("Error accessing localStorage:", error);
-  //   }
-  // }, []);
-
+  const [history, setHistory] = useState<
+    HistoryResponse[] | undefined | null
+  >();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     try {
       // Get the initial dark mode value from localStorage or default to false
@@ -68,144 +55,12 @@ export default function Home() {
       console.error("Error accessing localStorage:", error);
     }
   }, []);
-
-  const [history, setHistory] = useState<
-    HistoryResponse[] | undefined | null
-  >();
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-
   // Scroll to bottom on component update
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [messages]);
-
-  const handleToggle = (index: number) => {
-    if (clickedCard === index) {
-      // setClickedCard(null);
-    } else {
-      setClickedCard(index);
-    }
-  };
-  async function signOut() {
-    console.log("logged out", user);
-    const { error } = await supabase.auth.signOut();
-    setUser(null);
-    setChatId(null);
-    setMessages(null);
-    setHistory(null);
-    sessionStorage.removeItem("chat_id");
-    if (error) throw error;
-  }
-  async function handleChatId(id?: string) {
-    console.log("yes ");
-    if (id) {
-      sessionStorage.setItem("chat_id", id);
-      setChatId(id);
-    } else {
-      setClickedCard(null);
-      console.log("removing chatid");
-      sessionStorage.removeItem("chat_id");
-      setChatId(null);
-    }
-  }
-
-  // console.log(chatId);
-  async function fetchMessages() {
-    try {
-      const { data, error } = await supabase
-        .from("messages")
-        .select("message_id,sender,content")
-        .eq("chat_id", chatId)
-        .order("timestamp", { ascending: true });
-
-      if (error) throw error;
-      // console.log(data);
-      setMessages(data);
-    } catch (error) {
-      console.log("Messages retrieval failed", error);
-    }
-  }
-
-  // function to handle prompt submit button
-  async function handleSubmit() {
-    // console.log(chatId);
-    if (!chatId && user && ongoingPromt.trim() !== "") {
-      try {
-        const { data, error } = await supabase
-          .from("chats")
-          .insert([
-            {
-              user_id: user.id,
-              start_time: new Date(),
-              name: ongoingPromt, // Current timestamp
-            },
-          ])
-          .select();
-
-        if (error) {
-          throw error;
-        }
-        // console.log(data);
-        const insertedChatId = data[0].chat_id;
-        // console.log(insertedChatId);
-        setChatId(insertedChatId);
-        setClickedCard(0);
-        sessionStorage.setItem("chat_id", insertedChatId.toString());
-      } catch (error) {
-        console.error("Error inserting chat:", error);
-      }
-    }
-
-    try {
-      if (!user) {
-        alert("login first");
-      } else if (ongoingPromt.trim() !== "") {
-        const chat_id = sessionStorage.getItem("chat_id");
-
-        console.log("....I am here");
-
-        // add try and catch to handle error
-        const { error: promptError } = await supabase
-          .from("messages")
-          .insert([
-            {
-              chat_id: chat_id,
-              sender: "user",
-              timestamp: new Date(),
-              content: ongoingPromt,
-            },
-          ])
-          .select();
-        const result = await run(ongoingPromt);
-        if (result) {
-          console.log(result);
-
-          const { data, error } = await supabase
-            .from("messages")
-            .insert([
-              {
-                chat_id: chat_id,
-                sender: "chatbot",
-                timestamp: new Date(),
-                content: result.result,
-              },
-            ])
-            .select();
-
-          if (error) throw error;
-        }
-        // console.log(data);
-      } else return;
-      setOngoingPromt("");
-    } catch (error) {
-      console.log(error);
-    }
-
-    if (chatId) fetchMessages();
-  }
-
   useEffect(() => {
     // console.log("........in fetchmessage......");
     if (chatId && user) {
@@ -289,15 +144,195 @@ export default function Home() {
     };
     scrollToBottom();
   }, [messages]);
+  const handleToggle = (index: number) => {
+    if (clickedCard === index) {
+      // setClickedCard(null);
+    } else {
+      setClickedCard(index);
+    }
+  };
+  async function signOut() {
+    console.log("logged out", user);
+    const { error } = await supabase.auth.signOut();
+    setUser(null);
+    setChatId(null);
+    setMessages(null);
+    setHistory(null);
+    sessionStorage.removeItem("chat_id");
+    if (error) throw error;
+  }
+  async function handleChatId(id?: string) {
+    console.log("yes ");
+    if (id) {
+      sessionStorage.setItem("chat_id", id);
+      setChatId(id);
+    } else {
+      setClickedCard(null);
+      console.log("removing chatid");
+      sessionStorage.removeItem("chat_id");
+      setChatId(null);
+    }
+  }
+  // console.log(chatId);
+  async function fetchMessages() {
+    try {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("sender,content")
+        .eq("chat_id", chatId)
+        .order("timestamp", { ascending: true });
 
-  // async function handleSignInWithGoogle(response: any) {
-  //   const { data, error } = await supabase.auth.signInWithIdToken({
-  //     provider: "google",
-  //     token: response.credential,
-  //     nonce: "NONCE", // must be the same one as provided in data-nonce (if any)
-  //   });
-  //   console.log(data);
-  // }
+      if (error) throw error;
+      // console.log(data);
+      setMessages(data);
+    } catch (error) {
+      console.log("Messages retrieval failed", error);
+    }
+  }
+  // function to handle prompt submit button
+  async function handleSubmit() {
+    // console.log(chatId);
+    if (!chatId && user && ongoingPromt.trim() !== "") {
+      try {
+        const { data, error } = await supabase
+          .from("chats")
+          .insert([
+            {
+              user_id: user.id,
+              start_time: new Date(),
+              name: ongoingPromt, // Current timestamp
+            },
+          ])
+          .select();
+
+        if (error) {
+          throw error;
+        }
+        // console.log(data);
+        const insertedChatId = data[0].chat_id;
+        // console.log(insertedChatId);
+        setChatId(insertedChatId);
+        setClickedCard(0);
+        sessionStorage.setItem("chat_id", insertedChatId.toString());
+      } catch (error) {
+        console.error("Error inserting chat:", error);
+      }
+    }
+
+    try {
+      if (!user) {
+        alert("login first");
+      } else if (ongoingPromt.trim() !== "") {
+        const chat_id = sessionStorage.getItem("chat_id");
+
+        console.log("....I am here");
+
+        // add try and catch to handle error
+        const { data: promptMessage, error: promptError } = await supabase
+          .from("messages")
+          .insert([
+            {
+              chat_id: chat_id,
+              sender: "user",
+              timestamp: new Date(),
+              content: ongoingPromt,
+            },
+          ])
+          .select();
+        if (messages) {
+          setMessages([
+            ...messages,
+            {
+              sender: "user",
+              content: ongoingPromt,
+            },
+          ]);
+        } else {
+          setMessages([
+            {
+              sender: "user",
+              content: ongoingPromt,
+            },
+          ]);
+        }
+        const history = messages?.map((data) => {
+          var role = "user";
+          if (data.sender !== "user") {
+            role = "model";
+          }
+          return {
+            role,
+            parts: [
+              {
+                text: data.content,
+              },
+            ],
+          };
+        });
+        console.log(history);
+        const result = await run(ongoingPromt, history!);
+        let text = "";
+        let currentMessages = messages;
+
+        for await (const chunk of result.result?.stream!) {
+          const chunkText = chunk.text();
+          console.log(chunkText);
+          const miniChunks = chunkText.split(" ");
+          miniChunks.forEach((element) => {
+            text += element + " ";
+            console.log(chunkText);
+            if (messages) {
+              currentMessages = [
+                ...messages!,
+                {
+                  sender: "user",
+                  content: ongoingPromt,
+                },
+
+                {
+                  sender: "chatbot",
+                  content: text,
+                },
+              ];
+            } else {
+              currentMessages = [
+                {
+                  sender: "user",
+                  content: ongoingPromt,
+                },
+                {
+                  sender: "chatbot",
+                  content: text,
+                },
+              ];
+            }
+            setMessages(currentMessages);
+          });
+        }
+
+        if (text) {
+          const { data, error } = await supabase
+            .from("messages")
+            .insert([
+              {
+                chat_id: chat_id,
+                sender: "chatbot",
+                timestamp: new Date(),
+                content: text,
+              },
+            ])
+            .select();
+
+          if (error) throw error;
+        }
+      } else {
+        return;
+      }
+      setOngoingPromt("");
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <>

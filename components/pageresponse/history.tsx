@@ -18,7 +18,7 @@ const HistoryCard: React.FC<HistoryProps> = ({ name, onClick, className }) => {
     <div
       className={`${className} flex items-center px-3 py-3 hover:bg-gray-200 dark:bg-grayside dark:hover:bg-gray-800  rounded-xl`}
     >
-      <div className={` grow font-semibold rounded-xl dark:text-gray1`}>{name}</div>
+      <div className={` grow font-semibold rounded-xl dark:text-gray1 `}>{name.slice(0,30)}</div>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>
